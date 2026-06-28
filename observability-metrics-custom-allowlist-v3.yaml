@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: observability-metrics-custom-allowlist
+  namespace: open-cluster-management-observability
+data:
+  metrics_list.yaml: |
+    names:
+      # Availability
+      - up
+      - kube_node_info
+      - kube_node_status_allocatable
+      - kube_node_status_condition
+
+      # Pod state
+      - kube_pod_info
+      - kube_pod_status_phase
+      - kube_pod_status_ready
+      - kube_pod_owner
+      - kube_pod_container_status_restarts_total
+      - kube_pod_container_status_waiting_reason
+      - kube_pod_container_resource_requests
+      - kube_pod_container_resource_limits
+
+      # Storage
+      - kube_persistentvolumeclaim_info
+      - kube_persistentvolumeclaim_status_phase
+      - kube_storageclass_info
+      - kubelet_volume_stats_used_bytes
+      - kubelet_volume_stats_capacity_bytes
+      - kubelet_volume_stats_available_bytes
+
+      # Workloads
+      - kube_deployment_spec_replicas
+      - kube_deployment_status_replicas
+      - kube_deployment_status_replicas_available
+      - kube_deployment_status_replicas_unavailable
+      - kube_statefulset_status_replicas_ready
+      - kube_statefulset_spec_replicas
+
+      # Governance (CNCF best practices)
+      - kube_resourcequota
+      - kube_limitrange
+      - kube_poddisruptionbudget_status_current_healthy
+      - kube_poddisruptionbudget_status_desired_healthy
+
+      # Container resource usage
+      - container_cpu_usage_seconds_total
+      - container_memory_working_set_bytes
+      - container_memory_rss
+
+      # Network
+      - container_network_receive_bytes_total
+      - container_network_transmit_bytes_total
+      - container_network_receive_packets_dropped_total
+      - container_network_transmit_packets_dropped_total
+
+      # Node IO
+      - node_filesystem_avail_bytes
+      - node_filesystem_size_bytes
+      - node_disk_read_bytes_total
+      - node_disk_written_bytes_total
+
+      # OpenShift platform
+      - cluster_operator_conditions
+      - cluster_version
+
+      # Ingress / HAProxy
+      - haproxy_backend_up
+      - haproxy_backend_http_responses_total
+
+      # API server & etcd (CNCF SLOs)
+      - apiserver_request_total
+      - apiserver_request_duration_seconds_bucket
+      - etcd_server_leader_changes_seen_total
+      - etcd_server_has_leader
+      - etcd_mvcc_db_total_size_in_bytes
+
+      # Alerts
+      - ALERTS
+    rules:
+      - record: namespace_cpu:kube_pod_container_resource_requests:sum
+        expr: sum(kube_pod_container_resource_requests{resource="cpu"}) by (cluster, namespace)
+      - record: namespace_memory:kube_pod_container_resource_requests:sum
+        expr: sum(kube_pod_container_resource_requests{resource="memory"}) by (cluster, namespace)
